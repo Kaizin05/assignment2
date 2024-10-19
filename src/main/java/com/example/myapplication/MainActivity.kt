@@ -1,5 +1,3 @@
-package com.example.myapplication
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,13 +26,22 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import coil.compose.rememberImagePainter
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material3.Scaffold
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,7 +58,7 @@ fun NavigationApp() {
 
     NavHost(navController = navController, startDestination = "main_screen") {
         composable("main_screen") { SkillCinemaScreen(navController) }
-        composable("next_screen") { NextScreen() }
+        composable("next_screen") { NextScreen(navController) }
 
     }
 }
@@ -164,9 +171,8 @@ data class MovieItem(
 )
 
 @Composable
-fun NextScreen() {
-
-    val primieres = listOf(
+fun NextScreen(navController: NavHostController) {
+    val premieres = listOf(
         MovieItem("https://via.placeholder.com/150", 7.8, "Близкие", "драма"),
         MovieItem("https://via.placeholder.com/150", 7.8, "Близкие", "драма"),
         MovieItem("https://via.placeholder.com/150", 7.8, "Близкие", "драма"),
@@ -182,99 +188,194 @@ fun NextScreen() {
         MovieItem("https://via.placeholder.com/150", 7.8, "Близкие", "драма")
     )
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Scaffold(
+        bottomBar = { BottomNavigationBar(navController) } 
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues) 
+        ) {
+            item {
+                Text(
+                    text = "SkillCinema",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(top = 32.dp)
+                )
+            }
 
-        Text(
-            text = "Премьеры",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(16.dp)
-        )
-        MovieSection(title = "Популярные", movies = popular) { movie ->
-            
-            println("Clicked on: ${movie.title}")
+            item {
+                SectionHeader(title = "Премьеры")
+            }
+            item {
+                MovieSection(movies = premieres) { movie ->
+                    println("Clicked on: ${movie.title}")
+                }
+            }
+
+            item {
+                SectionHeader(title = "Популярные")
+            }
+            item {
+                MovieSection(movies = popular) { movie ->
+                    println("Clicked on: ${movie.title}")
+                }
+            }
+
+            item {
+                SectionHeader(title = "Боевики США")
+            }
+            item {
+                MovieSection(movies = popular) { movie ->
+                    println("Clicked on: ${movie.title}")
+                }
+            }
+
+            item {
+                SectionHeader(title = "ТОП-250")
+            }
+            item {
+                MovieSection(movies = popular) { movie ->
+                    println("Clicked on: ${movie.title}")
+                }
+            }
+
+            item {
+                SectionHeader(title = "Драма Франции")
+            }
+            item {
+                MovieSection(movies = popular) { movie ->
+                    println("Clicked on: ${movie.title}")
+                }
+            }
+
+            item {
+                SectionHeader(title = "Сериалы")
+            }
+            item {
+                MovieSection(movies = popular) { movie ->
+                    println("Clicked on: ${movie.title}")
+                }
+            }
         }
-        Text(
-            text = "Популярные",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(16.dp)
+    }
+}
+@Composable
+fun BottomNavigationBar(navController: NavHostController) {
+    NavigationBar {
+        val items = listOf(
+            BottomNavigationItem("Home","main_screen", Icons.Rounded.Home),
+            BottomNavigationItem("Search",  "search_screen", Icons.Rounded.Search),
+            BottomNavigationItem("Profile", "profile_screen", Icons.Rounded.Person)
         )
 
-        MovieSection(title = "Популярные", movies = popular) { movie ->
-
-            println("Clicked on: ${movie.title}")
+        items.forEach { item ->
+            NavigationBarItem(
+                selected = false,
+                onClick = { navController.navigate(item.route) },
+                icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
+                label = { Text(item.title) }
+            )
         }
     }
 }
 
-        @Composable
-        fun MovieSection(
-            title: String,
-            movies: List<MovieItem>,
-            onMovieClick: (MovieItem) -> Unit
-        ) {
-            Column(modifier = Modifier.padding(vertical = 16.dp).fillMaxWidth()) {
-                Text(
-                    text = title,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    fontSize = 18.sp,
-                    color = Color.Black
-                )
+data class BottomNavigationItem(
+    val title: String,
+    val route: String,
+    val icon: ImageVector = Icons.Rounded.Home
+)
 
-                LazyRow(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+
+@Composable
+            fun SectionHeader(title: String) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    items(movies) { movie: MovieItem ->
-                        MovieCard(movie = movie) {
-                            onMovieClick(movie)
+                    Text(
+                        text = title,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    TextButton(
+                        onClick = { },
+                        modifier = Modifier.padding(end = 16.dp)
+                    ) {
+                        Text(text = "ВСЕ", color = Color.Blue, fontSize = 16.sp)
+                    }
+                }
+            }
+
+
+            @Composable
+            fun MovieSection(
+                movies: List<MovieItem>,
+                onMovieClick: (MovieItem) -> Unit
+            ) {
+
+
+                Column(modifier = Modifier.padding(vertical = 16.dp).fillMaxWidth()) {
+                    LazyRow(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(movies) { movie: MovieItem ->
+                            MovieCard(movie = movie) {
+                                onMovieClick(movie)
+                            }
                         }
                     }
                 }
             }
-        }
 
-        @Composable
-        fun MovieCard(movie: MovieItem, onClick: () -> Unit) {
-            androidx.compose.material3.Card(
-                modifier = Modifier
-                    .width(111.dp)
-                    .height(194.dp)
-                    .padding(1.dp)
-                    .clickable { onClick() },
-                shape = RoundedCornerShape(8.dp),
-                elevation = androidx.compose.material3.CardDefaults.cardElevation(4.dp)
-            ) {
-                Column {
-                    Box(modifier = Modifier.height(156.dp)) {
 
-                        Text(
-                            text = movie.rating.toString(),
-                            color = Color.White,
-                            modifier = Modifier
-                                .padding(4.dp)
-                                .background(Color(0xFF3D3BFF), shape = RoundedCornerShape(4.dp))
-                                .padding(horizontal = 4.dp, vertical = 2.dp),
-                            fontSize = 10.sp
-                        )
+            @Composable
+            fun MovieCard(movie: MovieItem, onClick: () -> Unit) {
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clickable { onClick() },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    androidx.compose.material3.Card(
+                        modifier = Modifier
+                            .width(111.dp)
+                            .height(156.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        elevation = androidx.compose.material3.CardDefaults.cardElevation(4.dp)
+                    ) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Text(
+                                text = movie.rating.toString(),
+                                color = Color.White,
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .background(Color(0xFF3D3BFF), shape = RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                                fontSize = 10.sp
+                            )
+                        }
                     }
-                    Column(modifier = Modifier.padding(8.dp)) {
 
-                        Text(
-                            text = movie.title,
-                            fontSize = 14.sp,
-                            color = Color.Black
-                        )
-                        Text(
-                            text = movie.genre,
-                            fontSize = 12.sp,
-                            color = Color.Black
-                        )
-                    }
+                    Text(
+                        text = movie.title,
+                        fontSize = 14.sp,
+                        color = Color.Black,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Text(
+                        text = movie.genre,
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
                 }
-
             }
-        }
 
 
