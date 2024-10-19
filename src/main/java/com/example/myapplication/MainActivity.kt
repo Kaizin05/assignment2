@@ -191,7 +191,7 @@ fun NextScreen() {
             modifier = Modifier.padding(16.dp)
         )
         MovieSection(title = "Популярные", movies = popular) { movie ->
-            // Логика клика по фильму
+            
             println("Clicked on: ${movie.title}")
         }
         Text(
